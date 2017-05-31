@@ -12,6 +12,8 @@ def decision_step(Rover):
     # Example:
     # Check if we have vision data to make decisions with
     if Rover.nav_angles is not None:
+        #print the mode
+        print(Rover.mode, "MODE !!!!!!!!!!!!!!!!!")
         # Check for Rover.mode status
         if Rover.mode == 'forward': 
             # Check the extent of navigable terrain
@@ -60,6 +62,38 @@ def decision_step(Rover):
                     # Set steer to mean angle
                     Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)
                     Rover.mode = 'forward'
+        #get the sample
+        elif Rover.mode == 'get_sample':
+            if (np.mean(Rover.nav_dists) < 15):
+                Rover.throttle = 0
+                Rover.brake = Rover.brake_set
+                Rover.steer = 0
+                Rover.mode = 'stop'
+            elif (np.absolute(np.mean(Rover.nav_angles * 180/np.pi)) > 10):
+                if Rover.vel > 0.2:
+                    Rover.throttle = 0
+                    Rover.brake = Rover.brake_set
+                    Rover.steer = 0
+                # If we're not moving (vel < 0.2) then do something else
+                elif Rover.vel <= 0.2:
+                    # Release the brake to allow turning
+                    Rover.brake = 0
+                    # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
+                    Rover.steer = np.sign(np.mean(Rover.nav_angles)) * 15
+                # set in case rock isn't detected next time
+                Rover.mode = 'forward'        
+            else:
+                if Rover.vel < 1.5:
+                    # Set throttle value to throttle setting
+                    Rover.throttle = Rover.throttle_set
+                else: # Else coast
+                    Rover.throttle = 0
+                # Release the brake
+                Rover.brake = 0
+                # Set steer to mean angle
+                Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)                
+                # set in case rock isn't detected next time
+                Rover.mode = 'forward'            
     # Just to make the rover do something 
     # even if no modifications have been made to the code
     else:

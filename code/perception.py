@@ -50,7 +50,7 @@ def rover_coords(binary_img):
     # Calculate pixel positions with reference to the rover position being at the 
     # center bottom of the image.  
     x_pixel = np.absolute(ypos - binary_img.shape[0]).astype(np.float)
-    y_pixel = -(xpos - binary_img.shape[0]).astype(np.float)
+    y_pixel = -(xpos - binary_img.shape[1]/2).astype(np.float)
     return x_pixel, y_pixel
 
 
@@ -193,7 +193,7 @@ def perception_step(Rover):
 # 3) Apply color threshold to identify navigable terrain/obstacles/rock samples
     
     # find navigable terrain
-    terrain_threshed = color_thresh(warped)
+    terrain_threshed = color_thresh(warped, rgb_thresh=(140, 140, 140))
     # apply a mask to exclude known noisy areas
     terrain_threshed_masked = apply_mask(terrain_threshed, mask_type = 'terrain')
     
@@ -241,7 +241,7 @@ def perception_step(Rover):
         #          Rover.worldmap[navigable_y_world, navigable_x_world, 2] += 1
     Rover.worldmap[obstacle_y_world, obstacle_x_world, 0] += 1
     Rover.worldmap[rock_y_world, rock_x_world, 1] += 1
-    Rover.worldmap[terr_y_world, terr_x_world, 2] += 2
+    Rover.worldmap[terr_y_world, terr_x_world, 2] += 3
 
 # 8) Convert rover-centric pixel positions to polar coordinates
     # Update Rover pixel distances and angles
@@ -251,9 +251,7 @@ def perception_step(Rover):
     if (len(rock_xpix) != 0):
         print("GOING AFTER GOLD")
         Rover.nav_dists, Rover.nav_angles = to_polar_coords(rock_xpix, rock_ypix)
-        print(rock_threshed)
-
-        print()
+        Rover.mode = 'get_sample'
     else:
         #using unmasked terrain to get full vision
         terr_xpix_all, terr_ypix_all = rover_coords(terrain_threshed)
