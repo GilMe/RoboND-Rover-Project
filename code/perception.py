@@ -139,6 +139,27 @@ def apply_mask(threshed_img, mask_type):
 
     return threshed_img
 
+# This function overlays the steer direction of the rover to the Rover.vision_image for display
+def add_travel_direction(Rover):
+    #print("SHAPE!!!!",Rover.vision_image.shape)
+
+    arrow_length = 50
+
+    mean_dir = np.mean(Rover.nav_angles)
+    if not np.isnan(mean_dir):
+        x1 = int(Rover.vision_image.shape[1]/2)
+        y1 = Rover.vision_image.shape[0]
+
+        x2 = x1 - int(arrow_length * np.sin(mean_dir))
+        y2 = y1 - int(arrow_length * np.cos(mean_dir)) 
+
+        pt1 = (x1,y1)
+        pt2 = (x2,y2)
+
+        cv2.arrowedLine(Rover.vision_image, pt1, pt2, (255,0,255), 3)
+
+    return
+     
 
 
 # Apply the above functions in succession and update the Rover state accordingly
@@ -194,6 +215,7 @@ def perception_step(Rover):
     Rover.vision_image[:,:,1] = rock_threshed
     Rover.vision_image[:,:,2] = terrain_threshed_masked*255
 
+
 # 5) Convert map image pixel values to rover-centric coords
 
     terr_xpix, terr_ypix = rover_coords(terrain_threshed_masked)
@@ -218,7 +240,7 @@ def perception_step(Rover):
         #          Rover.worldmap[rock_y_world, rock_x_world, 1] += 1
         #          Rover.worldmap[navigable_y_world, navigable_x_world, 2] += 1
     Rover.worldmap[obstacle_y_world, obstacle_x_world, 0] += 1
-    #Rover.worldmap[rock_y_world, rock_x_world, 1] += 1
+    Rover.worldmap[rock_y_world, rock_x_world, 1] += 1
     Rover.worldmap[terr_y_world, terr_x_world, 2] += 2
 
 # 8) Convert rover-centric pixel positions to polar coordinates
@@ -226,8 +248,18 @@ def perception_step(Rover):
         # Rover.nav_dists = rover_centric_pixel_distances
         # Rover.nav_angles = rover_centric_angles
 
-    #using unmasked terrain to get full vision
-    terr_xpix_all, terr_ypix_all = rover_coords(terrain_threshed)
-    Rover.nav_dists, Rover.nav_angles = to_polar_coords(terr_xpix_all, terr_ypix_all)   
+    if (len(rock_xpix) != 0):
+        print("GOING AFTER GOLD")
+        Rover.nav_dists, Rover.nav_angles = to_polar_coords(rock_xpix, rock_ypix)
+        print(rock_threshed)
+
+        print()
+    else:
+        #using unmasked terrain to get full vision
+        terr_xpix_all, terr_ypix_all = rover_coords(terrain_threshed)
+        Rover.nav_dists, Rover.nav_angles = to_polar_coords(terr_xpix_all, terr_ypix_all)  
+
+    #add arrow showing direction of travel to the displayed image in Rover.vision_image
+    add_travel_direction(Rover)
     
     return Rover
