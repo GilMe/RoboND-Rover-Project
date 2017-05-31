@@ -9,6 +9,7 @@ import time
 def convert_to_float(string_to_convert):
       if ',' in string_to_convert:
             float_value = np.float(string_to_convert.replace(',','.'))
+            float_value = np.float(string_to_convert)
       else: 
             float_value = np.float(string_to_convert)
       return float_value
