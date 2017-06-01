@@ -193,7 +193,7 @@ def perception_step(Rover):
 # 3) Apply color threshold to identify navigable terrain/obstacles/rock samples
     
     # find navigable terrain
-    terrain_threshed = color_thresh(warped, rgb_thresh=(140, 140, 140))
+    terrain_threshed = color_thresh(warped)
     # apply a mask to exclude known noisy areas
     terrain_threshed_masked = apply_mask(terrain_threshed, mask_type = 'terrain')
     
