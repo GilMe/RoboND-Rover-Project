@@ -49,13 +49,15 @@ def decision_step(Rover):
                     
                     #check if on open plain or corridor
                     if (len(Rover.nav_angles) > 1400):
-                        angle = aver_angle + deviation/1.5
+                        angle = aver_angle + deviation/2
                         print("wall crawling")
                     else:
                         angle = aver_angle
                         print("NOT wall crawling")
                     print("STEERING ANGLE = ", angle)
                     Rover.steer = np.clip(angle, -15, 15)
+                    if (((angle > 15) | (angle < -15)) & (Rover.vel > Rover.max_vel/2)):
+                        Rover.brake = 1
 
             # If there's a lack of navigable terrain pixels then go to 'stop' mode
             elif len(Rover.nav_angles) < Rover.stop_forward:
