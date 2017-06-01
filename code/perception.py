@@ -115,7 +115,9 @@ def apply_mask(threshed_img, mask_type):
     terrain_corr_width = 15         #the width of the navigable corridor
     terrain_corr_height = 100       #the height of the navigable corridor
     
-    obstacle_radius_scale = 2       #the scale between the bottom rectangle and the radius above 
+#    obstacle_radius_scale = 2       #the scale between the bottom rectangle and the radius above 
+    obstacle_radius_scale = 1.5       #the scale between the bottom rectangle and the radius above 
+ 
     obstacle_corr_width_scale = 1   #the scale between the corridor width of the terrain and the obstacle
     obstacle_bottom_height = terrain_radius * obstacle_radius_scale #the height of the bottom rectangle
     obstacle_corr_width = terrain_corr_width * obstacle_corr_width_scale  #the width of the corridor

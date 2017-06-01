@@ -23,9 +23,10 @@ def decision_step(Rover):
                     Rover.throttle = 0
                     # Release the brake to allow turning
                     Rover.brake = 0
+                    # Get the steering angle direction
                     # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
                     if Rover.steer != 0:
-                        Rover.steer = np.sign(Rover.steer) * 15
+                        Rover.steer = np.sign(np.mean(Rover.nav_angles)) * 15
                     else:
                         Rover.steer = -15
                 # If mode is forward, navigable terrain looks good 
@@ -40,7 +41,15 @@ def decision_step(Rover):
                     # Set steering to average angle clipped to the range +/- 15
                     aver_angle = np.mean(Rover.nav_angles * 180/np.pi)
                     deviation = np.std(Rover.nav_angles * 180/np.pi)
-                    angle = aver_angle + deviation/3.5
+                    print("Number of nav_angle points=", len(Rover.nav_angles),"###########################")
+                    
+                    #check if on open plain or corridor
+                    if (len(Rover.nav_angles) > 1400):
+                        angle = aver_angle + deviation/2
+                        print("wall crawling")
+                    else:
+                        angle = aver_angle
+                        print("NOT wall crawling")
                     print("STEERING ANGLE = ", angle)
                     Rover.steer = np.clip(angle, -15, 15)
 
