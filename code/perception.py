@@ -249,6 +249,7 @@ def perception_step(Rover):
     
     if (stable_cam):
         Rover.worldmap[obstacle_y_world, obstacle_x_world, 0] += 1
+        Rover.worldmap[obstacle_y_world, obstacle_x_world, 2] -= 1
         Rover.worldmap[terr_y_world, terr_x_world, 2] += 3
 
     Rover.worldmap[rock_y_world, rock_x_world, 1] += 1

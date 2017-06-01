@@ -52,7 +52,7 @@ def decision_step(Rover):
                     print("Number of nav_angle points=", len(Rover.nav_angles),"###########################")
                     
                     #check if on open plain or corridor
-                    if (len(Rover.nav_angles) > 1400):
+                    if (len(Rover.nav_angles) > 1000):
                         angle = aver_angle - deviation/3
                         print("wall crawling")
                     else:
