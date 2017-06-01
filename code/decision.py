@@ -19,14 +19,18 @@ def decision_step(Rover):
             # Check the extent of navigable terrain
             if len(Rover.nav_angles) >= Rover.stop_forward:  
                 #try to get unstuck
-                if (Rover.throttle == Rover.throttle_set) and (Rover.vel == 0):
+                if (Rover.throttle == Rover.throttle_set) and (Rover.vel <= 0):
                     Rover.throttle = 0
                     # Release the brake to allow turning
                     Rover.brake = 0
                     # Get the steering angle direction
                     # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
                     if Rover.steer != 0:
-                        Rover.steer = np.sign(np.mean(Rover.nav_angles)) * 15
+                        angle = np.mean(Rover.nav_angles * 180/np.pi)
+                        if (abs(angle) < 15):
+                            Rover.steer = -15
+                        else:
+                            Rover.steer = np.sign(angle) * 15
                     else:
                         Rover.steer = -15
                 # If mode is forward, navigable terrain looks good 
@@ -45,7 +49,7 @@ def decision_step(Rover):
                     
                     #check if on open plain or corridor
                     if (len(Rover.nav_angles) > 1400):
-                        angle = aver_angle + deviation/2
+                        angle = aver_angle + deviation/1.5
                         print("wall crawling")
                     else:
                         angle = aver_angle

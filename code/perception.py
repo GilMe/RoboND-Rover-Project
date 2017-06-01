@@ -258,14 +258,19 @@ def perception_step(Rover):
         # Rover.nav_dists = rover_centric_pixel_distances
         # Rover.nav_angles = rover_centric_angles
 
-    if (len(rock_xpix) != 0):
-        print("GOING AFTER GOLD")
-        Rover.nav_dists, Rover.nav_angles = to_polar_coords(rock_xpix, rock_ypix)
-        Rover.mode = 'get_sample'
-    else:
+#    if (len(rock_xpix) != 0):
+#        print("GOING AFTER GOLD")
+#        Rover.nav_dists, Rover.nav_angles = to_polar_coords(rock_xpix, rock_ypix)
+#        Rover.mode = 'get_sample'
+#    else:
+#        #using unmasked terrain to get full vision
+#        terr_xpix_all, terr_ypix_all = rover_coords(terrain_threshed)
+#        Rover.nav_dists, Rover.nav_angles = to_polar_coords(terr_xpix_all, terr_ypix_all)  
+
         #using unmasked terrain to get full vision
-        terr_xpix_all, terr_ypix_all = rover_coords(terrain_threshed)
-        Rover.nav_dists, Rover.nav_angles = to_polar_coords(terr_xpix_all, terr_ypix_all)  
+    terr_xpix_all, terr_ypix_all = rover_coords(terrain_threshed)
+    Rover.nav_dists, Rover.nav_angles = to_polar_coords(terr_xpix_all, terr_ypix_all)  
+
 
     #add arrow showing direction of travel to the displayed image in Rover.vision_image
     add_travel_direction(Rover)
