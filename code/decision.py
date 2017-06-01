@@ -1,6 +1,22 @@
 import numpy as np
 
+def get_unstuck(Rover):
+    Rover.throttle = 0
+    # Release the brake to allow turning
+    Rover.brake = 0
+    # Get the steering angle direction
+    # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
+    
+    angle = np.mean(Rover.nav_angles * 180/np.pi)
+    if Rover.steer != 0:
 
+        if (abs(angle) < 5):
+            Rover.steer = 15
+        else:
+            Rover.steer = np.sign(angle) * 15
+    else:
+        Rover.steer = 15
+    return
 # This is where you can build a decision tree for determining throttle, brake and steer 
 # commands based on the output of the perception_step() function
 def decision_step(Rover):
@@ -20,19 +36,7 @@ def decision_step(Rover):
             if len(Rover.nav_angles) >= Rover.stop_forward:  
                 #try to get unstuck
                 if (Rover.throttle == Rover.throttle_set) and (Rover.vel <= 0):
-                    Rover.throttle = 0
-                    # Release the brake to allow turning
-                    Rover.brake = 0
-                    # Get the steering angle direction
-                    # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
-                    if Rover.steer != 0:
-                        angle = np.mean(Rover.nav_angles * 180/np.pi)
-                        if (abs(angle) < 15):
-                            Rover.steer = -15
-                        else:
-                            Rover.steer = np.sign(angle) * 15
-                    else:
-                        Rover.steer = -15
+                    get_unstuck(Rover)
                 # If mode is forward, navigable terrain looks good 
                 # and velocity is below max, then throttle 
                 else:
@@ -49,7 +53,7 @@ def decision_step(Rover):
                     
                     #check if on open plain or corridor
                     if (len(Rover.nav_angles) > 1400):
-                        angle = aver_angle + deviation/2
+                        angle = aver_angle - deviation/3
                         print("wall crawling")
                     else:
                         angle = aver_angle
@@ -87,7 +91,7 @@ def decision_step(Rover):
                     if Rover.steer != 0:
                         Rover.steer = np.sign(Rover.steer) * 15
                     else:
-                        Rover.steer = -15
+                        Rover.steer = 15
                 # If we're stopped but see sufficient navigable terrain in front then go!
                 if len(Rover.nav_angles) >= Rover.go_forward:
                     # Set throttle back to stored value
@@ -105,6 +109,9 @@ def decision_step(Rover):
                 Rover.brake = Rover.brake_set
                 Rover.steer = 0
                 Rover.mode = 'stop'
+            #if try to get unstuck
+            elif (Rover.throttle == Rover.throttle_set) and (Rover.vel <= 0):
+                get_unstuck(Rover)
             elif (np.absolute(np.mean(Rover.nav_angles * 180/np.pi)) > 20):
                 if Rover.vel > 0.2:
                     Rover.throttle = 0

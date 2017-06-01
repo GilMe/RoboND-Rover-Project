@@ -35,8 +35,8 @@ def rock_thresh(img):
     img_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     
     # create lower and upper limits for gold color
-    lower_gold = gold_hsv - np.array([40,80,80])
-    upper_gold = gold_hsv + np.array([40,80,80])
+    lower_gold = gold_hsv - np.array([60,80,80])
+    upper_gold = gold_hsv + np.array([60,80,80])
 
     #do the threshold
     rock_threshed = cv2.inRange(img_hsv, lower_gold, upper_gold)
@@ -133,8 +133,8 @@ def apply_mask(threshed_img, mask_type):
                 & ((np.absolute(row - nrows) > terrain_corr_height) \
                 | (np.absolute(col - cnt_col) > terrain_corr_width))  
     elif mask_type is 'obstacle':
-        mask = (np.absolute(nrows-row) + 0*col > obstacle_bottom_height) \
-                | (np.absolute(col - cnt_col) + 0*row < obstacle_corr_width)
+        mask = (np.absolute(nrows-row) + 0*col > obstacle_bottom_height) #\
+ #               | (np.absolute(col - cnt_col) + 0*row < obstacle_corr_width)
     
     # zeroing all the cells we want to ignore
     threshed_img[mask] = 0
@@ -195,12 +195,12 @@ def perception_step(Rover):
 # 3) Apply color threshold to identify navigable terrain/obstacles/rock samples
     
     # find navigable terrain
-    terrain_threshed = color_thresh(warped)
+    terrain_threshed = color_thresh(warped,rgb_thresh=(140, 140, 140))
     # apply a mask to exclude known noisy areas
     terrain_threshed_masked = apply_mask(terrain_threshed, mask_type = 'terrain')
     
     # find obstacles
-    obstacle_threshed = color_thresh(warped, rgb_thresh=(140, 140, 140),  above=False)
+    obstacle_threshed = color_thresh(warped, rgb_thresh=(100, 100, 100),  above=False)
     # apply a mask to exclude known noisy areas
     obstacle_threshed_masked = apply_mask(obstacle_threshed, mask_type = 'obstacle')
 
@@ -258,18 +258,18 @@ def perception_step(Rover):
         # Rover.nav_dists = rover_centric_pixel_distances
         # Rover.nav_angles = rover_centric_angles
 
-#    if (len(rock_xpix) != 0):
-#        print("GOING AFTER GOLD")
-#        Rover.nav_dists, Rover.nav_angles = to_polar_coords(rock_xpix, rock_ypix)
-#        Rover.mode = 'get_sample'
-#    else:
-#        #using unmasked terrain to get full vision
-#        terr_xpix_all, terr_ypix_all = rover_coords(terrain_threshed)
-#        Rover.nav_dists, Rover.nav_angles = to_polar_coords(terr_xpix_all, terr_ypix_all)  
+    if (len(rock_xpix) != 0):
+        print("GOING AFTER GOLD")
+        Rover.nav_dists, Rover.nav_angles = to_polar_coords(rock_xpix, rock_ypix)
+        Rover.mode = 'get_sample'
+    else:
+        #using unmasked terrain to get full vision
+        terr_xpix_all, terr_ypix_all = rover_coords(terrain_threshed)
+        Rover.nav_dists, Rover.nav_angles = to_polar_coords(terr_xpix_all, terr_ypix_all)  
 
         #using unmasked terrain to get full vision
-    terr_xpix_all, terr_ypix_all = rover_coords(terrain_threshed)
-    Rover.nav_dists, Rover.nav_angles = to_polar_coords(terr_xpix_all, terr_ypix_all)  
+#    terr_xpix_all, terr_ypix_all = rover_coords(terrain_threshed)
+#    Rover.nav_dists, Rover.nav_angles = to_polar_coords(terr_xpix_all, terr_ypix_all)  
 
 
     #add arrow showing direction of travel to the displayed image in Rover.vision_image
