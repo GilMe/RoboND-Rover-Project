@@ -10,7 +10,7 @@ def get_unstuck(Rover):
     angle = np.mean(Rover.nav_angles * 180/np.pi)
     if Rover.steer != 0:
 
-        if (abs(angle) < 5):
+        if (abs(angle) < 10):
             Rover.steer = 15
         else:
             Rover.steer = np.sign(angle) * 15
@@ -61,7 +61,7 @@ def decision_step(Rover):
                     print("STEERING ANGLE = ", angle)
                     Rover.steer = np.clip(angle, -15, 15)
                     if (((angle > 15) | (angle < -15)) & (Rover.vel > Rover.max_vel/2)):
-                        Rover.brake = 1
+                        Rover.brake = 10
 
             # If there's a lack of navigable terrain pixels then go to 'stop' mode
             elif len(Rover.nav_angles) < Rover.stop_forward:
@@ -69,7 +69,7 @@ def decision_step(Rover):
                     Rover.throttle = 0
                     # Set brake to stored brake value
                     Rover.brake = Rover.brake_set
-                    Rover.steer = 0
+#                    Rover.steer = 0
                     Rover.mode = 'stop'
 
         # If we're already in "stop" mode then make different decisions
@@ -78,7 +78,8 @@ def decision_step(Rover):
             if Rover.vel > 0.2:
                 Rover.throttle = 0
                 Rover.brake = Rover.brake_set
-                Rover.steer = 0
+#                Rover.steer = 0
+                Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)
             # If we're not moving (vel < 0.2) then do something else
             elif Rover.vel <= 0.2:
                 # Now we're stopped and we have vision data to see if there's a path forward
@@ -86,6 +87,7 @@ def decision_step(Rover):
                     Rover.throttle = 0
                     # Release the brake to allow turning
                     Rover.brake = 0
+                    
                     # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
                     #Rover.steer = -15 # Could be more clever here about which way to turn
                     if Rover.steer != 0:
@@ -108,23 +110,21 @@ def decision_step(Rover):
                 Rover.throttle = 0
                 Rover.brake = Rover.brake_set
                 Rover.steer = 0
-                Rover.mode = 'stop'
             #if try to get unstuck
             elif (Rover.throttle == Rover.throttle_set) and (Rover.vel <= 0):
                 get_unstuck(Rover)
             elif (np.absolute(np.mean(Rover.nav_angles * 180/np.pi)) > 20):
                 if Rover.vel > 0.2:
                     Rover.throttle = 0
-                    Rover.brake = 0.4
+#                    Rover.brake = 0.4
+                    Rover.brake = 5
                     Rover.steer = 0
                 # If we're not moving (vel < 0.2) then do something else
                 elif Rover.vel <= 0.2:
                     # Release the brake to allow turning
                     Rover.brake = 0
                     # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
-                    Rover.steer = np.sign(np.mean(Rover.nav_angles)) * 15
-                # set in case rock isn't detected next time
-                Rover.mode = 'forward'        
+                    Rover.steer = np.sign(np.mean(Rover.nav_angles)) * 15        
             else:
                 if Rover.vel < 1.5:
                     # Set throttle value to throttle setting
@@ -135,11 +135,13 @@ def decision_step(Rover):
                 Rover.brake = 0
                 # Set steer to mean angle
                 Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)                
-                # set in case rock isn't detected next time
-                Rover.mode = 'forward'            
+            
+            # set in case rock isn't detected next time
+            Rover.mode = 'forward'            
     # Just to make the rover do something 
     # even if no modifications have been made to the code
     else:
+        print("Something bad happened")
         Rover.throttle = Rover.throttle_set
         Rover.steer = 0
         Rover.brake = 0
@@ -147,6 +149,7 @@ def decision_step(Rover):
     # If in a state where want to pickup a rock send pickup command
     if Rover.near_sample and Rover.vel == 0 and not Rover.picking_up:
         Rover.send_pickup = True
+        Rover.mode = 'forward'
     
     return Rover
 

@@ -103,9 +103,9 @@ def perspect_transform(img, src, dst):
     
     return warped
 
-# Use mask which chooses which parts of the image to take into account and which to ignore
-# For terrain it is a circle at the bottom of the screen and a rectangle from the bottom center(see writeup.md)
-# For obstacles its a rectangle two rectangles in the upper right and left corners (see writeup.md)
+# apply_mask chooses which parts of the image to take into account and which to ignore
+# For terrain it will choose a circle at the bottom of the screen and a rectangle from the bottom center(see writeup.md)
+# For obstacles its a lower rectangle (see writeup.md)
 def apply_mask(threshed_img, mask_type):
     
     #Some variables to play with
@@ -264,7 +264,7 @@ def perception_step(Rover):
         Rover.nav_dists, Rover.nav_angles = to_polar_coords(rock_xpix, rock_ypix)
         Rover.mode = 'get_sample'
     else:
-        #using unmasked terrain to get full vision
+        #using unmasked terrain to get full vision line of sights
         terr_xpix_all, terr_ypix_all = rover_coords(terrain_threshed)
         Rover.nav_dists, Rover.nav_angles = to_polar_coords(terr_xpix_all, terr_ypix_all)  
 
